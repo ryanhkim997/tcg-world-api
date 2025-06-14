@@ -1,0 +1,1 @@
+export type Card = { name: string; weight: number };
