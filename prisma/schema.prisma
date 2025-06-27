@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client-js"
+
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model card_price_history {
+  id         Int      @id @default(autoincrement())
+  card_id    Int?
+  price      Decimal? @default(0) @db.Decimal(15, 2)
+  fetched_at DateTime @default(now()) @db.Timestamptz(6)
+  volume     Int?     @default(0)
+  cards      cards?   @relation(fields: [card_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model cards {
+  id                 Int                  @id @unique @default(autoincrement())
+  price_charting_id  String?              @unique(map: "cards_external_sku_key")
+  card_name          String
+  set_name           String?
+  created_at         DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  tcg_player_link    String?
+  current_price      Decimal              @default(0) @db.Decimal(15, 2)
+  current_volume     Int?                 @default(0)
+  release_date       DateTime?            @db.Date
+  image_url          String?
+  card_price_history card_price_history[]
+  pack_cards         pack_cards[]
+}
+
+model mock_customer_feedback {
+  id               Int       @id @default(autoincrement())
+  customer_email   String?
+  feedback_summary String?
+  sentiment        String?
+  source           String?
+  submitted_at     DateTime? @db.Timestamp(6)
+  type             String?
+}
+
+model mock_customer_invoices {
+  id             Int       @id @default(autoincrement())
+  customer_email String?
+  amount_dollars Decimal?  @db.Decimal
+  issued_at      DateTime? @db.Timestamp(6)
+  status         String?
+  description    String?
+  is_refunded    Boolean?
+}
+
+model mock_subscriptions {
+  id             Int       @id @default(autoincrement())
+  customer_email String?
+  plan           String?
+  status         String?
+  started_at     DateTime? @db.Timestamp(6)
+  cancelled_at   DateTime? @db.Timestamp(6)
+  customer_ein   String?
+}
+
+model mock_support_tickets {
+  id             Int       @id @default(autoincrement())
+  channel        String?
+  submitted_at   DateTime? @db.Timestamp(6)
+  customer_name  String?
+  ticket_type    String?
+  priority       String?
+  needs_human    Boolean?
+  summary        String?
+  full_text      String?
+  tags           String?
+  status         String?
+  customer_email String?
+}
+
+model pack_cards {
+  id                     Int     @id @default(autoincrement())
+  pack_id                Int?
+  weight                 Decimal @default(0) @db.Decimal(15, 2)
+  price_charting_card_id String?
+  packs                  packs?  @relation(fields: [pack_id], references: [id], onDelete: Cascade)
+  cards                  cards?  @relation(fields: [price_charting_card_id], references: [price_charting_id], onDelete: Cascade)
+}
+
+model pack_price_history {
+  id         Int       @id @default(autoincrement())
+  pack_id    Int?
+  pack_ev    Decimal?  @default(0) @db.Decimal(15, 2)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+  packs      packs?    @relation(fields: [pack_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model packs {
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  theme              String?
+  description        String?
+  created_at         DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  expected_value     Decimal?             @default(0) @db.Decimal(15, 2)
+  pack_cards         pack_cards[]
+  pack_price_history pack_price_history[]
+}
+
+model pokemon_card_list_staging {
+  id                Int      @id @default(autoincrement())
+  card_name         String?
+  console_name      String?
+  loose_price       Decimal? @default(0) @db.Decimal
+  price_charting_id String?
+  sales_volume      Int?     @default(0)
+  tcg_id            String?
+  date_time_updated DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model policy_versions {
+  id            Int      @id @default(autoincrement())
+  policy_name   String
+  version       String
+  publlished_at DateTime @default(now()) @db.Timestamptz(6)
+  content_url   String?
+}
+
+model price_sources {
+  id           Int     @id @default(autoincrement())
+  name         String? @unique
+  api_endpoint String?
+}
+
+model tour_orders {
+  id                   Int       @id @default(autoincrement())
+  customer_name        String?
+  product              String?
+  quantity             Int?
+  unit_price           String?
+  order_date           DateTime? @db.Date
+  order_status         String?
+  destination_facility String?
+}
+
+model user_policy_agreements {
+  id           Int      @id @default(autoincrement())
+  user_id      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  policy_name  String
+  version_name String?
+  agreed_at    DateTime @default(now()) @db.Timestamptz(6)
+}
