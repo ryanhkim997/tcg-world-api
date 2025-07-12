@@ -1,0 +1,44 @@
+name: Deploy Backend (Production)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "deploy/fly.prod.toml"
+
+jobs:
+  deploy:
+    environment: production
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Build Backend
+        run: yarn build
+
+      - name: Pre-deploy Health Check
+        run: curl -f https://tcg-world-backend-prod.fly.dev/health || echo "Pre-deploy health check failed or not reachable (continuing anyway)"
+
+      - name: Install Fly CLI
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io (Prod)
+        run: flyctl deploy -c deploy/fly.prod.toml --remote-only --app tcg-backend
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Post-deploy Health Check
+        run: |
+          echo "Waiting for backend to be ready..."
+          sleep 10
+          curl -f https://tcg-world-backend-prod.fly.dev/health || exit 1
