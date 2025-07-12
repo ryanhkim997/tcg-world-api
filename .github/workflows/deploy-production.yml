@@ -33,7 +33,7 @@ jobs:
         uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy to Fly.io (Prod)
-        run: flyctl deploy -c fly.prod.toml --remote-only --app tcg-backend
+        run: flyctl deploy -c deploy/fly.prod.toml --remote-only --app tcg-backend
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
