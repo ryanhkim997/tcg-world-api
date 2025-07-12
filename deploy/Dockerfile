@@ -6,7 +6,6 @@
     
     LABEL fly_launch_runtime="NestJS/Prisma"
     
-    WORKDIR /app
     ARG YARN_VERSION=1.22.22
     RUN npm install -g yarn@$YARN_VERSION --force
     
