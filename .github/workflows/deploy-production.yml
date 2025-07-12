@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "fly.prod.toml"
+      - "deploy/fly.prod.toml"
 
 jobs:
   deploy:
