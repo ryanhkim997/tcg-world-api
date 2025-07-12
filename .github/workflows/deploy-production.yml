@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "deploy/fly.prod.toml"
 
 jobs:
   deploy:
