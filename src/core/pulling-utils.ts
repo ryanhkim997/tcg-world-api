@@ -21,8 +21,7 @@ export function weightedChoice(
   rng: () => number,
   items: Card[],
   k = 1
-): string[] {
-  const values = items.map((c) => c.name);
+): Card[] {
   const weights = items.map((c) => c.weight);
   const cumWeights = weights.map(
     (
@@ -31,12 +30,12 @@ export function weightedChoice(
     )(0)
   );
   const total = cumWeights[cumWeights.length - 1];
-  const results: string[] = [];
+  const results: Card[] = [];
 
   for (let i = 0; i < k; i++) {
     const x = rng() * total;
     const index = cumWeights.findIndex((cw) => x < cw);
-    results.push(values[index]);
+    results.push(items[index]);
   }
 
   return results;
