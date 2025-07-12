@@ -4,6 +4,9 @@ primary_region = "sea"
 [build.args]
   NODE_ENV = "production"
 
+[build]
+  dockerfile = "./Dockerfile"
+
 [deploy]
   release_command = "yarn prisma migrate deploy"
 
