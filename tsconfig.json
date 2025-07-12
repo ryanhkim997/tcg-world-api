@@ -11,7 +11,8 @@
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "types": ["node"]
   },
   "include": ["src/**/*", "types.ts"],
   "exclude": ["node_modules", "dist"]

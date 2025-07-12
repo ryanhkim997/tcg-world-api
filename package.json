@@ -19,6 +19,7 @@
   "scripts": {
     "start": "ts-node src/main.ts",
     "start:dev": "ts-node-dev --respawn src/main.ts",
+    "start:prod": "node dist/main.js",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\""
   },
