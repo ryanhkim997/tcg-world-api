@@ -10,6 +10,7 @@ async function bootstrap() {
       "https://tcg-world-ui-env-dev-tcg-world-d1b60ad9.vercel.app",
     ],
   });
-  await app.listen(3001, "0.0.0.0");
+
+  await app.listen(process.env.PORT || 3000, "0.0.0.0");
 }
 bootstrap();
