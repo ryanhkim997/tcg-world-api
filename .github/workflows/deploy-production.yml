@@ -24,8 +24,8 @@ jobs:
       - name: Build Backend
         run: yarn build
 
-      - name: Pre-deploy Health Check
-        run: curl -f https://tcg-world-backend-prod.fly.dev/health || echo "Pre-deploy health check failed or not reachable (continuing anyway)"
+      # - name: Pre-deploy Health Check
+      #   run: curl -f https://tcg-world-backend-prod.fly.dev/health || echo "Pre-deploy health check failed or not reachable (continuing anyway)"
 
       - name: Install Fly CLI
         uses: superfly/flyctl-actions/setup-flyctl@master

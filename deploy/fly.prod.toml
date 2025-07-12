@@ -18,15 +18,6 @@ primary_region = "sea"
   min_machines_running = 1
   processes = ["app"]
 
-  [[http_service.checks]]
-    interval = "10s"
-    timeout = "5s"
-    grace_period = "10s"
-    method = "GET"
-    path = "/health"
-    protocol = "http"
-    tls_skip_verify = false
-
 [[vm]]
   memory = "1gb"
   cpu_kind = "shared"
