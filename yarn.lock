@@ -266,7 +266,7 @@
   resolved "https://registry.yarnpkg.com/@oxlint/win32-x64/-/win32-x64-1.6.0.tgz#4136819bcd4018f474620bf9cd6d788c292bb7ba"
   integrity sha512-jOj3L/gfLc0IwgOTkZMiZ5c673i/hbAmidlaylT0gE6H18hln9HxPgp5GCf4E4y6mwEJlW8QC5hQi221+9otdA==
 
-"@prisma/client@^6.10.1":
+"@prisma/client@6.11.1":
   version "6.11.1"
   resolved "https://registry.yarnpkg.com/@prisma/client/-/client-6.11.1.tgz#ef97454d8b0bb192b26ec4111def83ddee4615e3"
   integrity sha512-5CLFh8QP6KxRm83pJ84jaVCeSVPQr8k0L2SEtOJHwdkS57/VQDcI/wQpGmdyOZi+D9gdNabdo8tj1Uk+w+upsQ==
