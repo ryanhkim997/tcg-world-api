@@ -4,7 +4,9 @@ import {
   getHmacSeed,
   weightedChoice,
 } from "../../core/pulling-utils";
-import { Card } from "../../../types";
+import { PackCards } from "@prisma/client";
+import { PackCardsService } from "../packs/services/pack-cards.service";
+import { FlattenedPackCard } from "../packs/repositories/pack-cards.repository";
 
 const mockPackData = {
   id: 1,
@@ -124,8 +126,10 @@ const mockPackData = {
 
 @Controller("pull")
 export class PullController {
+  constructor(private readonly packCardsService: PackCardsService) {}
+
   @Post()
-  pullCard(
+  async pullCard(
     @Body()
     body: {
       userId: string;
@@ -133,16 +137,22 @@ export class PullController {
       clientSeed: string;
       nonce: number;
     }
-  ): { pulledCard: Card; hash: string; nonce: number } {
-    const { clientSeed, nonce } = body;
+  ): Promise<{ pulledCard: FlattenedPackCard; hash: string; nonce: number }> {
+    const { clientSeed, nonce, packId } = body;
     const serverSeed = process.env.SERVER_SEED || "super_secret_seed";
+
+    const packCards = await this.packCardsService.findByPackId(packId);
+
+    if (!packCards || packCards.length === 0) {
+      throw new Error("Pack not found or has no cards");
+    }
 
     const hmac = getHmacSeed(serverSeed, clientSeed, nonce);
     const rng = deterministicRandom(hmac);
-    const pack = weightedChoice(rng, mockPackData.cards, 12);
+    const chosen = weightedChoice(rng, packCards, 12);
 
     return {
-      pulledCard: pack[0],
+      pulledCard: chosen[0],
       hash: hmac,
       nonce,
     };

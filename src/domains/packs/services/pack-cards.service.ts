@@ -1,4 +1,7 @@
-import { PackCardsRepository } from "../repositories/pack-cards.repository";
+import {
+  PackCardsRepository,
+  FlattenedPackCard,
+} from "../repositories/pack-cards.repository";
 import { Injectable } from "@nestjs/common";
 import { PackCards } from "@prisma/client";
 import { PaginationDto } from "../../../common/dto/pagination.dto";
@@ -8,7 +11,7 @@ import { PaginatedResponse } from "../../../common/interfaces/pagination-respons
 export class PackCardsService {
   constructor(private readonly packCardsRepository: PackCardsRepository) {}
 
-  async findAll(
+  public async findAll(
     pagination: PaginationDto
   ): Promise<PaginatedResponse<PackCards>> {
     const [data, total] = await this.packCardsRepository.findAll(pagination);
@@ -21,15 +24,15 @@ export class PackCardsService {
     };
   }
 
-  findById(id: string): Promise<PackCards | null> {
+  public async findById(id: string): Promise<PackCards | null> {
     return this.packCardsRepository.findById(id);
   }
 
-  findByPackId(packId: string): Promise<PackCards[]> {
+  public async findByPackId(packId: string): Promise<FlattenedPackCard[]> {
     return this.packCardsRepository.findByPackId(packId);
   }
 
-  findByCardId(cardId: string): Promise<PackCards[]> {
+  public async findByCardId(cardId: string): Promise<PackCards[]> {
     return this.packCardsRepository.findByCardId(cardId);
   }
 }
