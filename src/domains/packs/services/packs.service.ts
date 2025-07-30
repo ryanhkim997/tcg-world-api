@@ -3,6 +3,7 @@ import { PacksRepository } from "../repositories/packs.repository";
 import { Injectable } from "@nestjs/common";
 import { PaginationDto } from "../../../common/dto/pagination.dto";
 import { PaginatedResponse } from "../../../common/interfaces/pagination-response.interface";
+import { PackWithCards } from "../types";
 
 @Injectable()
 export class PacksService {
@@ -19,7 +20,15 @@ export class PacksService {
     };
   }
 
-  findById(id: string): Promise<Packs | null> {
+  findById(id: string): Promise<PackWithCards | null> {
     return this.packsRepository.findById(id);
+  }
+
+  async findByIdWithFeatured(id: string): Promise<PackWithCards | null> {
+    const pack: PackWithCards | null = await this.packsRepository.findById(id);
+
+    if (!pack) return null;
+
+    return pack;
   }
 }

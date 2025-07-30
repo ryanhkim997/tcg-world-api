@@ -2,17 +2,17 @@ import { PrismaService } from "../../../common/prisma/prisma.service";
 import { Packs } from "@prisma/client";
 import { PaginationDto } from "../../../common/dto/pagination.dto";
 import { Injectable } from "@nestjs/common";
+import { PackWithCards } from "../types";
 
 @Injectable()
 export class PacksRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(pagination: PaginationDto): Promise<[Packs[], number]> {
+  async findAll(pagination: PaginationDto): Promise<[Packs[], number]> {
     return this.prisma.$transaction([
       this.prisma.packs.findMany({
         take: pagination.take,
         skip: pagination.skip,
-        orderBy: { createdAt: "desc" },
         include: {
           packCards: {
             where: { isFeatured: true },
@@ -32,7 +32,12 @@ export class PacksRepository {
     ]);
   }
 
-  findById(id: string): Promise<Packs | null> {
-    return this.prisma.packs.findUnique({ where: { id } });
+  findById(id: string): Promise<PackWithCards | null> {
+    return this.prisma.packs.findUnique({
+      where: { id },
+      include: {
+        packCards: { where: { packId: id }, include: { cards: true } },
+      },
+    });
   }
 }
