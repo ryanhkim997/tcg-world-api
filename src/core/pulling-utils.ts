@@ -1,6 +1,8 @@
 import crypto from "crypto";
 import seedrandom from "seedrandom";
-import { Card } from "../../types";
+import { Card } from "../common/types";
+import { PackCards } from "@prisma/client";
+import { FlattenedPackCard } from "../domains/packs/repositories/pack-cards.repository";
 
 export function getHmacSeed(
   serverSeed: string,
@@ -19,10 +21,10 @@ export function deterministicRandom(seedHex: string): () => number {
 
 export function weightedChoice(
   rng: () => number,
-  items: Card[],
+  items: FlattenedPackCard[],
   k = 1
-): Card[] {
-  const weights = items.map((c) => c.weight);
+): FlattenedPackCard[] {
+  const weights = items.map((c) => c.weight || 0);
   const cumWeights = weights.map(
     (
       (sum) => (value) =>
@@ -30,7 +32,7 @@ export function weightedChoice(
     )(0)
   );
   const total = cumWeights[cumWeights.length - 1];
-  const results: Card[] = [];
+  const results: FlattenedPackCard[] = [];
 
   for (let i = 0; i < k; i++) {
     const x = rng() * total;

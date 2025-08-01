@@ -7,261 +7,320 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model card_price_history {
-  price      Decimal   @default(0) @db.Decimal(15, 2)
-  volume     Int?      @default(0)
-  card_id    String    @db.Uuid
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  updated_at DateTime? @default(now()) @db.Timestamptz(6)
-  created_at DateTime? @default(now()) @db.Timestamptz(6)
-  cards      card      @relation(fields: [card_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+model PokemonCardListStaging {
+  id              Int       @id @default(autoincrement())
+  cardName        String?   @map("card_name")
+  consoleName     String?   @map("console_name")
+  loosePrice      Decimal?  @default(0) @map("loose_price") @db.Decimal
+  priceChartingId String?   @map("price_charting_id")
+  salesVolume     Int?      @default(0) @map("sales_volume")
+  tcgId           String?   @map("tcg_id")
+  dateTimeUpdated DateTime  @default(now()) @map("date_time_updated") @db.Timestamptz(6)
+  createdAt       DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@map("pokemon_card_list_staging")
 }
 
-model pack_price_history {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pack_ev    Decimal   @default(0) @db.Decimal(15, 2)
-  pack_id    String    @db.Uuid
-  created_at DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at DateTime? @default(now()) @db.Timestamptz(6)
-  packs      pack      @relation(fields: [pack_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+model PriceSources {
+  id          Int       @id @default(autoincrement())
+  name        String?   @unique
+  apiEndpoint String?   @map("api_endpoint")
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@map("price_sources")
 }
 
-model pokemon_card_list_staging {
-  id                Int       @id @default(autoincrement())
-  card_name         String?
-  console_name      String?
-  loose_price       Decimal?  @default(0) @db.Decimal
-  price_charting_id String?
-  sales_volume      Int?      @default(0)
-  tcg_id            String?
-  date_time_updated DateTime  @default(now()) @db.Timestamptz(6)
-  created_at        DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime? @default(now()) @db.Timestamptz(6)
+model PullHistory {
+  id         String    @id @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  datePulled DateTime  @map("date_pulled") @db.Timestamp(6)
+  cardPrice  Decimal   @map("card_price") @db.Decimal
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  cardPackId String    @map("card_pack_id") @db.Uuid
+  cardPack   PackCards @relation(fields: [cardPackId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user       Users     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("pull_history")
 }
 
-model price_sources {
-  id           Int       @id @default(autoincrement())
-  name         String?   @unique
-  api_endpoint String?
-  created_at   DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+model UserCard {
+  id                 String    @id @db.Uuid
+  currentPrice       Decimal   @map("current_price") @db.Decimal(15, 2)
+  obtainedAt         DateTime  @map("obtained_at") @db.Timestamp(6)
+  cardId             String    @map("card_id") @db.Uuid
+  userId             String    @map("user_id") @db.Uuid
+  priceLockEndDate   DateTime  @map("price_lock_end_date") @db.Timestamp(6)
+  currentPriceInGems Int       @default(0) @map("current_price_in_gems")
+  lockedPriceInGems  Int       @default(0) @map("locked_price_in_gems")
+  lockedPrice        Decimal   @map("locked_price") @db.Decimal(15, 2)
+  createdAt          DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  card               Cards     @relation(fields: [cardId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user               Users     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("user_card")
 }
 
-model address {
-  street_address_1 String
-  street_address_2 String?
-  city             String
-  state            String
-  zip              String
-  country          String
-  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id          String?      @db.Uuid
-  created_at       DateTime?    @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime?    @default(now()) @db.Timestamptz(6)
-  user             user?        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_address_user")
-  withdrawal       withdrawal[]
+model UserPolicyAgreement {
+  id              String    @id @db.Uuid
+  versionAccepted String?   @map("version_accepted")
+  acceptedAt      DateTime  @map("accepted_at") @db.Timestamp(6)
+  userId          String    @map("user_id") @db.Uuid
+  createdAt       DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  user            Users     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("user_policy_agreement")
 }
 
-model card {
-  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  card_name          String
-  current_price      Decimal              @default(0) @db.Decimal(15, 2)
-  current_volume     Int?                 @default(0)
-  price_charting_id  String
-  release_date       DateTime?            @default(now()) @db.Date
-  set_name           String?
+model Addresses {
+  streetAddress_1 String        @map("street_address_1")
+  streetAddress_2 String?       @map("street_address_2")
+  city            String
+  state           String
+  zip             String
+  country         String
+  id              String        @id(map: "address_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String?       @map("user_id") @db.Uuid
+  createdAt       DateTime?     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime?     @default(now()) @map("updated_at") @db.Timestamptz(6)
+  users           Users?        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_address_user")
+  withdrawals     Withdrawals[]
+
+  @@map("addresses")
+}
+
+model Cards {
+  id                 String              @id(map: "card_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cardName           String              @map("card_name")
+  currentPrice       Decimal             @default(0) @map("current_price") @db.Decimal(15, 2)
+  currentPriceInGems Int?                @default(0) @map("current_price_in_gems")
+  currentVolume      Int?                @default(0) @map("current_volume")
+  priceChartingId    String              @unique @map("price_charting_id")
+  releaseDate        DateTime?           @default(now()) @map("release_date") @db.Date
+  setName            String?             @map("set_name")
   language           String?
-  image_url          String?
-  tier               tier_enum_a49971a4?  @default(Tier1)
-  created_at         DateTime?            @default(now()) @db.Timestamptz(6)
-  updated_at         DateTime?            @default(now()) @db.Timestamptz(6)
-  card_pack          card_pack[]
-  card_price_history card_price_history[]
-  user_card          user_card[]
+  imageUrl           String?             @map("image_url")
+  createdAt          DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime?           @default(now()) @map("updated_at") @db.Timestamptz(6)
+  cardsPriceHistory  CardsPriceHistory[]
+  packCards          PackCards[]
+  userCard           UserCard[]
+
+  @@map("cards")
 }
 
-model card_pack {
-  weight       Decimal        @default(0) @db.Decimal(15, 2)
-  card_id      String         @db.Uuid
-  pack_id      String         @db.Uuid
-  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  created_at   DateTime?      @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime?      @default(now()) @db.Timestamptz(6)
-  card         card           @relation(fields: [card_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  pack         pack           @relation(fields: [pack_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  pull_history pull_history[]
+model CardsPriceHistory {
+  price     Decimal   @default(0) @db.Decimal(15, 2)
+  volume    Int?      @default(0)
+  cardId    String    @map("card_id") @db.Uuid
+  id        String    @id(map: "card_price_history_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  updatedAt DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  cards     Cards     @relation(fields: [cardId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "card_price_history_card_id_fkey")
+
+  @@map("cards_price_history")
 }
 
-model deposit {
-  user_id                    String               @db.Uuid
-  order_date                 DateTime             @default(now()) @db.Timestamptz(6)
-  gem_count                  Int                  @default(0)
-  dollar_cost_of_transaction Int                  @default(0)
-  error_reason               String?
-  status                     status_enum_77ad13bd
-  id                         String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  created_at                 DateTime?            @default(now()) @db.Timestamptz(6)
-  updated_at                 DateTime?            @default(now()) @db.Timestamptz(6)
-  user                       user                 @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+model Deposits {
+  userId                  String              @map("user_id") @db.Uuid
+  orderDate               DateTime            @default(now()) @map("order_date") @db.Timestamptz(6)
+  gemCount                Int                 @default(0) @map("gem_count")
+  dollarCostOfTransaction Int                 @default(0) @map("dollar_cost_of_transaction")
+  errorReason             String?             @map("error_reason")
+  status                  StatusEnum_77ad13bd
+  id                      String              @id(map: "deposit_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt               DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime?           @default(now()) @map("updated_at") @db.Timestamptz(6)
+  users                   Users               @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "deposit_user_id_fkey")
+
+  @@map("deposits")
 }
 
-model email_notification {
-  id         Int       @id @default(autoincrement())
+model EmailNotifications {
+  id         Int       @id(map: "email_notification_pkey") @default(autoincrement())
   promotions Boolean   @default(false)
-  new_drops  Boolean   @default(false)
+  newDrops   Boolean   @default(false) @map("new_drops")
   memes      Boolean   @default(false)
-  user_id    String    @db.Uuid
-  created_at DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at DateTime? @default(now()) @db.Timestamptz(6)
-  user       user      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  userId     String    @map("user_id") @db.Uuid
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  users      Users     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "email_notification_user_id_fkey")
+
+  @@map("email_notifications")
 }
 
-model pack {
-  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name               String
-  description        String?
-  theme              String?
-  expected_value     Decimal              @default(0) @db.Decimal(15, 2)
-  house_margin       Decimal              @default(0) @db.Decimal(15, 2)
-  price              Decimal?             @db.Decimal(15, 2)
-  gem_price          Int?
-  language           String?
-  created_at         DateTime?            @default(now()) @db.Timestamptz(6)
-  updated_at         DateTime?            @default(now()) @db.Timestamptz(6)
-  card_pack          card_pack[]
-  pack_price_history pack_price_history[]
+model PackCards {
+  weight        Decimal           @default(0) @db.Decimal(15, 2)
+  cardId        String            @map("card_id") @db.Uuid
+  packId        String            @map("pack_id") @db.Uuid
+  id            String            @id(map: "card_pack_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt     DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime?         @default(now()) @map("updated_at") @db.Timestamptz(6)
+  isFeatured    Boolean           @default(false) @map("is_featured")
+  featuredOrder Int?              @map("featured_order")
+  tier          TierEnumA49971a4? @default(Tier1)
+  cards         Cards             @relation(fields: [cardId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "card_pack_card_id_fkey")
+  packs         Packs             @relation(fields: [packId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "card_pack_pack_id_fkey")
+  pullHistory   PullHistory[]
+
+  @@map("pack_cards")
 }
 
-model pull_history {
-  id           String    @id @db.Uuid
-  user_id      String    @db.Uuid
-  date_pulled  DateTime  @db.Timestamp(6)
-  card_price   Decimal   @db.Decimal
-  created_at   DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
-  card_pack_id String    @db.Uuid
-  card_pack    card_pack @relation(fields: [card_pack_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user         user      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+model Packs {
+  id                String              @id(map: "pack_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name              String
+  description       String?
+  theme             String?
+  expectedValue     Decimal             @default(0) @map("expected_value") @db.Decimal(15, 2)
+  houseMargin       Decimal             @default(0) @map("house_margin") @db.Decimal(15, 2)
+  price             Decimal?            @db.Decimal(15, 2)
+  gemPrice          Int?                @map("gem_price")
+  language          String?
+  createdAt         DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime?           @default(now()) @map("updated_at") @db.Timestamptz(6)
+  packCards         PackCards[]
+  packsPriceHistory PacksPriceHistory[]
+
+  @@map("packs")
 }
 
-model ticket {
-  id          String                  @id @db.Uuid
+model PacksPriceHistory {
+  id        String    @id(map: "pack_price_history_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  packEv    Decimal   @default(0) @map("pack_ev") @db.Decimal(15, 2)
+  packId    String    @map("pack_id") @db.Uuid
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  packs     Packs     @relation(fields: [packId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "pack_price_history_pack_id_fkey")
+
+  @@map("packs_price_history")
+}
+
+model Tickets {
+  id          String                 @id(map: "ticket_pkey") @db.Uuid
   subject     String?
   description String?
-  category    category_enum_05e41e19?
-  user_id     String                  @db.Uuid
-  created_at  DateTime?               @default(now()) @db.Timestamptz(6)
-  updated_at  DateTime?               @default(now()) @db.Timestamptz(6)
-  user        user                    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  category    CategoryEnum_05e41e19?
+  userId      String                 @map("user_id") @db.Uuid
+  createdAt   DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime?              @default(now()) @map("updated_at") @db.Timestamptz(6)
+  users       Users                  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "ticket_user_id_fkey")
+
+  @@map("tickets")
 }
 
-model user {
-  first_name            String
-  last_name             String
-  email                 String
-  phone_number          String?
-  password              String
-  username              String
-  gem_count             Int                                    @default(0)
-  nonce                 Int?                                   @default(0)
-  client_seed           String?
-  salt                  String?
-  status                status_enum_b633788f
-  language              String?
-  timezone              Unsupported("timezone_enum_1137e051")?
-  id                    String                                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  created_at            DateTime?                              @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime?                              @default(now()) @db.Timestamptz(6)
-  address               address[]
-  deposit               deposit[]
-  email_notification    email_notification[]
-  pull_history          pull_history[]
-  ticket                ticket[]
-  user_card             user_card[]
-  user_policy_agreement user_policy_agreement[]
-  withdrawal            withdrawal[]
+model Users {
+  firstName           String                 @map("first_name")
+  lastName            String                 @map("last_name")
+  email               String
+  phoneNumber         String?                @map("phone_number")
+  password            String
+  username            String
+  gemCount            Int                    @default(0) @map("gem_count")
+  nonce               Int?                   @default(0)
+  clientSeed          String?                @map("client_seed")
+  salt                String?
+  status              StatusEnumB633788f
+  language            String?
+  timezone            TimezoneEnum_1137e051?
+  id                  String                 @id(map: "user_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt           DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime?              @default(now()) @map("updated_at") @db.Timestamptz(6)
+  addresses           Addresses[]
+  deposits            Deposits[]
+  emailNotifications  EmailNotifications[]
+  pullHistory         PullHistory[]
+  tickets             Tickets[]
+  userCard            UserCard[]
+  userPolicyAgreement UserPolicyAgreement[]
+  withdrawals         Withdrawals[]
+
+  @@map("users")
 }
 
-model user_card {
-  id                    String    @id @db.Uuid
-  current_price         Decimal   @db.Decimal(15, 2)
-  obtained_at           DateTime  @db.Timestamp(6)
-  card_id               String    @db.Uuid
-  user_id               String    @db.Uuid
-  price_lock_end_date   DateTime  @db.Timestamp(6)
-  current_price_in_gems Int       @default(0)
-  locked_price_in_gems  Int       @default(0)
-  locked_price          Decimal   @db.Decimal(15, 2)
-  created_at            DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime? @default(now()) @db.Timestamptz(6)
-  card                  card      @relation(fields: [card_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user                  user      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+model Withdrawals {
+  id               String                         @id(map: "withdrawal_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId           String?                        @map("user_id") @db.Uuid
+  shippingAddress  String                         @map("shipping_address") @db.Uuid
+  phoneNumber      String?                        @map("phone_number")
+  shippingCost     Decimal?                       @default(0) @map("shipping_cost") @db.Decimal(15, 2)
+  gemCount         Int                            @default(0) @map("gem_count")
+  orderDate        DateTime                       @default(now()) @map("order_date") @db.Timestamptz(6)
+  lastUpdatedDate  DateTime?                      @default(now()) @map("last_updated_date") @db.Timestamptz(6)
+  trackingNumber   String?                        @map("tracking_number")
+  errorReason      String?                        @map("error_reason")
+  paymentProvider  PaymentProviderEnum_1022488b   @map("payment_provider")
+  status           StatusEnum_676ca451
+  shippingProvider ShippingProviderEnum_7947d55e? @map("shipping_provider")
+  createdAt        DateTime?                      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime?                      @default(now()) @map("updated_at") @db.Timestamptz(6)
+  users            Users?                         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_withdrawal_user")
+  addresses        Addresses                      @relation(fields: [shippingAddress], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "withdrawal_shipping_address_fkey")
+
+  @@map("withdrawals")
 }
 
-model user_policy_agreement {
-  id               String    @id @db.Uuid
-  version_accepted String?
-  accepted_at      DateTime  @db.Timestamp(6)
-  user_id          String    @db.Uuid
-  created_at       DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
-  user             user      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-}
-
-model withdrawal {
-  id                String                                        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id           String?                                       @db.Uuid
-  shipping_address  String                                        @db.Uuid
-  phone_number      String?
-  shipping_cost     Decimal?                                      @default(0) @db.Decimal(15, 2)
-  gem_count         Int                                           @default(0)
-  order_date        DateTime                                      @default(now()) @db.Timestamptz(6)
-  last_updated_date DateTime?                                     @default(now()) @db.Timestamptz(6)
-  tracking_number   String?
-  error_reason      String?
-  payment_provider  Unsupported("payment_provider_enum_1022488b")
-  status            status_enum_676ca451
-  shipping_provider shipping_provider_enum_7947d55e?
-  created_at        DateTime?                                     @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime?                                     @default(now()) @db.Timestamptz(6)
-  user              user?                                         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_withdrawal_user")
-  address           address                                       @relation(fields: [shipping_address], references: [id], onDelete: Cascade, onUpdate: NoAction)
-}
-
-enum category_enum_05e41e19 {
+enum CategoryEnum_05e41e19 {
   Complaint1
   Complaint2
+
+  @@map("category_enum_05e41e19")
 }
 
-enum shipping_provider_enum_7947d55e {
+enum ShippingProviderEnum_7947d55e {
   usps
   ups
   fedex
   dhl
+
+  @@map("shipping_provider_enum_7947d55e")
 }
 
-enum status_enum_676ca451 {
+enum StatusEnum_676ca451 {
   processing
   completed
   failed
+
+  @@map("status_enum_676ca451")
 }
 
-enum status_enum_77ad13bd {
+enum StatusEnum_77ad13bd {
   processing
   completed
   failed
+
+  @@map("status_enum_77ad13bd")
 }
 
-enum status_enum_b633788f {
+enum StatusEnumB633788f {
   active
   deleted
   blacklisted
+
+  @@map("status_enum_b633788f")
 }
 
-enum tier_enum_a49971a4 {
+enum TierEnumA49971a4 {
   Tier1
   Tier2
   Tier3
   Tier4
   Tier5
+
+  @@map("tier_enum_a49971a4")
+}
+
+enum TimezoneEnum_1137e051 {
+  PST
+
+  @@map("timezone_enum_1137e051")
+}
+
+enum PaymentProviderEnum_1022488b {
+  card
+
+  @@map("payment_provider_enum_1022488b")
 }
