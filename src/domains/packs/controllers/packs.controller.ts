@@ -15,6 +15,7 @@ export class PacksController {
     @Query() pagination: PaginationDto
   ): Promise<PaginatedResponse<PacksResponseDto>> {
     const result = await this.packsService.findAll(pagination);
+    console.log(result);
 
     return {
       ...result,
