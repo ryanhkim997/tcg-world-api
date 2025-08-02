@@ -1,3 +1,4 @@
 -- AlterTable
-ALTER TABLE "cards" ADD COLUMN     "current_price_in_gems" INTEGER DEFAULT 0;
+ALTER TABLE "users" ALTER COLUMN "first_name" DROP NOT NULL,
+ALTER COLUMN "last_name" DROP NOT NULL;
 
