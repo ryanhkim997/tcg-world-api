@@ -131,7 +131,7 @@ model Deposits {
   gemCount                Int                 @default(0) @map("gem_count")
   dollarCostOfTransaction Int                 @default(0) @map("dollar_cost_of_transaction")
   errorReason             String?             @map("error_reason")
-  status                  StatusEnum_77ad13bd
+  status                  DepositStatus
   id                      String              @id(map: "deposit_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt               DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt               DateTime?           @default(now()) @map("updated_at") @db.Timestamptz(6)
@@ -162,7 +162,7 @@ model PackCards {
   updatedAt     DateTime?         @default(now()) @map("updated_at") @db.Timestamptz(6)
   isFeatured    Boolean           @default(false) @map("is_featured")
   featuredOrder Int?              @map("featured_order")
-  tier          TierEnumA49971a4? @default(Tier1)
+  tier          TierEnum?         @default(TIER_1)
   cards         Cards             @relation(fields: [cardId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "card_pack_card_id_fkey")
   packs         Packs             @relation(fields: [packId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "card_pack_pack_id_fkey")
   pullHistory   PullHistory[]
@@ -213,9 +213,9 @@ model Tickets {
 }
 
 model Users {
-  firstName           String                 @map("first_name")
-  lastName            String                 @map("last_name")
-  email               String
+  firstName           String?                @map("first_name")
+  lastName            String?                @map("last_name")
+  email               String                 @unique
   phoneNumber         String?                @map("phone_number")
   password            String
   username            String
@@ -223,9 +223,9 @@ model Users {
   nonce               Int?                   @default(0)
   clientSeed          String?                @map("client_seed")
   salt                String?
-  status              StatusEnumB633788f
+  status              UserStatus
   language            String?
-  timezone            TimezoneEnum_1137e051?
+  timezone            Timezone?
   id                  String                 @id(map: "user_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt           DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt           DateTime?              @default(now()) @map("updated_at") @db.Timestamptz(6)
@@ -252,9 +252,9 @@ model Withdrawals {
   lastUpdatedDate  DateTime?                      @default(now()) @map("last_updated_date") @db.Timestamptz(6)
   trackingNumber   String?                        @map("tracking_number")
   errorReason      String?                        @map("error_reason")
-  paymentProvider  PaymentProviderEnum_1022488b   @map("payment_provider")
-  status           StatusEnum_676ca451
-  shippingProvider ShippingProviderEnum_7947d55e? @map("shipping_provider")
+  paymentProvider  PaymentProvider   @map("payment_provider")
+  status           WithdrawalStatus
+  shippingProvider ShippingProviderEnum? @map("shipping_provider")
   createdAt        DateTime?                      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt        DateTime?                      @default(now()) @map("updated_at") @db.Timestamptz(6)
   users            Users?                         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_withdrawal_user")
@@ -270,57 +270,57 @@ enum CategoryEnum_05e41e19 {
   @@map("category_enum_05e41e19")
 }
 
-enum ShippingProviderEnum_7947d55e {
-  usps
-  ups
-  fedex
-  dhl
+enum ShippingProviderEnum {
+  USPS
+  UPS
+  FEDEX
+  DHL
 
   @@map("shipping_provider_enum_7947d55e")
 }
 
-enum StatusEnum_676ca451 {
-  processing
-  completed
-  failed
+enum WithdrawalStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
 
   @@map("status_enum_676ca451")
 }
 
-enum StatusEnum_77ad13bd {
-  processing
-  completed
-  failed
+enum DepositStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
 
   @@map("status_enum_77ad13bd")
 }
 
-enum StatusEnumB633788f {
-  active
-  deleted
-  blacklisted
+enum UserStatus {
+  ACTIVE
+  DELETED
+  BLACKLISTED
 
   @@map("status_enum_b633788f")
 }
 
-enum TierEnumA49971a4 {
-  Tier1
-  Tier2
-  Tier3
-  Tier4
-  Tier5
+enum TierEnum {
+  TIER_1
+  TIER_2
+  TIER_3
+  TIER_4
+  TIER_5
 
   @@map("tier_enum_a49971a4")
 }
 
-enum TimezoneEnum_1137e051 {
+enum Timezone {
   PST
 
   @@map("timezone_enum_1137e051")
 }
 
-enum PaymentProviderEnum_1022488b {
-  card
+enum PaymentProvider {
+  CARD
 
   @@map("payment_provider_enum_1022488b")
 }
