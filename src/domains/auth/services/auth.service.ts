@@ -28,7 +28,7 @@ export class AuthService {
         email: user.email,
         password: hashed,
         username: user.username,
-        status: UserStatus.active,
+        status: UserStatus.ACTIVE,
       },
     });
     return this.login(newUser);
